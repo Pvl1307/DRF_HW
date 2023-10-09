@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from users.models import User
@@ -9,6 +10,8 @@ class Course(models.Model):
     title = models.CharField(max_length=200, verbose_name='Course title', **NULLABLE)
     picture = models.ImageField(upload_to='course/', verbose_name='Course picture', **NULLABLE)
     description = models.TextField(verbose_name='Course description', **NULLABLE)
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE)
 
     def __str__(self):
         return f'{self.title}'
@@ -26,8 +29,10 @@ class Lesson(models.Model):
     picture = models.ImageField(upload_to='course/lesson', **NULLABLE)
     video_url = models.URLField(max_length=500, verbose_name='Lesson video URL', **NULLABLE)
 
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE)
+
     def __str__(self):
-        return f'{self.title}: {self.video_url}'
+        return f'{self.course}: {self.title}'
 
     class Meta:
         verbose_name = 'Lesson'
@@ -40,7 +45,7 @@ class Payments(models.Model):
         ('transfer', 'Transfer'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User', related_name='user')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User', **NULLABLE)
     payment_date = models.DateTimeField(auto_now_add=True, **NULLABLE, verbose_name='Payment Date')
 
     paid_course = models.ForeignKey(Course, on_delete=models.CASCADE, **NULLABLE, related_name='course')
