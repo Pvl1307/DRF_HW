@@ -11,17 +11,21 @@ from course.serializers import CourseSerializer, LessonSerializer, PaymentsSeria
 class CourseViewSet(ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
-    permission_classes = (IsAuthenticated, IsModer,)
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
 
-    def perform_create(self, serializer):
-        new_course = serializer.save()
-        new_course.owner = self.request.user
-        new_course.save()
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsAuthenticated, IsOwner]
+        elif self.action in ['update', 'retrieve']:
+            return [IsAuthenticated, IsOwner | IsModer]
+        elif self.action == 'destroy':
+            return [IsAuthenticated, IsOwner]
+        return super().get_permissions()
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated, IsModer, IsOwner]
 
     def perform_create(self, serializer):
         new_lesson = serializer.save()
@@ -32,23 +36,24 @@ class LessonCreateAPIView(generics.CreateAPIView):
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = (IsOwner, IsModer)
+    permission_classes = [IsAuthenticated, IsOwner | IsModer]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = (IsOwner, IsModer)
+    permission_classes = [IsOwner | IsModer]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    permission_classes = (IsOwner,)
+    permission_classes = [IsAuthenticated, IsOwner]
 
 
 class PaymentsListAPIView(generics.ListAPIView):

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 
 from users.models import User
@@ -11,7 +10,7 @@ class Course(models.Model):
     picture = models.ImageField(upload_to='course/', verbose_name='Course picture', **NULLABLE)
     description = models.TextField(verbose_name='Course description', **NULLABLE)
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, **NULLABLE)
 
     def __str__(self):
         return f'{self.title}'
@@ -29,10 +28,10 @@ class Lesson(models.Model):
     picture = models.ImageField(upload_to='course/lesson', **NULLABLE)
     video_url = models.URLField(max_length=500, verbose_name='Lesson video URL', **NULLABLE)
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, **NULLABLE)
 
     def __str__(self):
-        return f'{self.course}: {self.title}'
+        return f'{self.pk} {self.course}: {self.title}: {self.owner}'
 
     class Meta:
         verbose_name = 'Lesson'
