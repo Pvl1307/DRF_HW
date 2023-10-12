@@ -20,6 +20,19 @@ class Course(models.Model):
         verbose_name_plural = 'Courses'
 
 
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User', **NULLABLE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Course', **NULLABLE, related_name='subs')
+    subscription = models.BooleanField(default=False, verbose_name='Subscription')
+
+    def __str__(self):
+        return f'{self.user} subscription on {self.course}: {self.subscription}'
+
+    class Meta:
+        verbose_name = 'Subscription'
+        verbose_name_plural = 'Subscriptions'
+
+
 class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, **NULLABLE, related_name='lessons')
 
