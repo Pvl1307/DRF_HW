@@ -9,11 +9,12 @@ class Course(models.Model):
     title = models.CharField(max_length=200, verbose_name='Course title', **NULLABLE)
     picture = models.ImageField(upload_to='course/', verbose_name='Course picture', **NULLABLE)
     description = models.TextField(verbose_name='Course description', **NULLABLE)
+    price = models.IntegerField(verbose_name='Price')
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE, **NULLABLE)
 
     def __str__(self):
-        return f'{self.title}'
+        return f'{self.title}.Price-{self.price}'
 
     class Meta:
         verbose_name = 'Course'
@@ -40,11 +41,12 @@ class Lesson(models.Model):
     description = models.TextField(verbose_name='Lesson description', **NULLABLE)
     picture = models.ImageField(upload_to='course/lesson', **NULLABLE)
     video_url = models.URLField(max_length=500, verbose_name='Lesson video URL', **NULLABLE)
+    price = models.IntegerField(verbose_name='Price')
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE, **NULLABLE)
 
     def __str__(self):
-        return f'{self.pk} {self.course}: {self.title}: {self.owner}'
+        return f'{self.pk} {self.course}: {self.title}: {self.owner}. Price-{self.price}'
 
     class Meta:
         verbose_name = 'Lesson'

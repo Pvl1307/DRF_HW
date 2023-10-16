@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_filters',
+    'drf_yasg',
 
     'users',
     'course',
@@ -140,4 +141,5 @@ REST_FRAMEWORK = {
     )
 }
 
-AUTH_USER_MODEL = 'users.User'
+
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
