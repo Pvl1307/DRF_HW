@@ -5,25 +5,36 @@ from config.settings import STRIPE_API_KEY
 stripe.api_key = STRIPE_API_KEY
 
 
-def create_price(type_of_obj, obj):
-    starter_subscription = stripe.Product.create(
-        name=f'{type_of_obj} "{obj.title}"',
+def get_link(obj):
+    if obj.paid_course:
+        title = obj.paid_course.title
+        description = obj.paid_course.description
+    else:
+        title = obj.paid_lesson.title
+        description = obj.paid_lesson.description
+
+    product = stripe.Product.create(
+        name=title,
+        description=description
+    )
+    product_price = stripe.Price.create(
+        unit_amount=obj.amount * 100,
+        currency='dkk',
+        product=product['id']
     )
 
-    starter_subscription_price = stripe.Price.create(
-        unit_amount=obj.price * 100,
-        currency="dkk",
-        recurring={"interval": "month"},
-        product=starter_subscription['id'],
-    )
-
-    link = stripe.PaymentLink.create(
+    session = stripe.checkout.Session.create(
+        success_url='http://127.0.0.1:8000/payments/success/?success=true&session_id={CHECKOUT_SESSION_ID}',
         line_items=[
             {
-                "price": starter_subscription_price.id,
-                "quantity": 1,
-            },
+                'price': product_price,
+                'quantity': 1
+            }
         ],
+        mode='payment',
+        metadata={
+            'payment_id': obj.id
+        }
     )
 
-    return link.get('url', 'Сосамба, нет ссылки!')
+    return session['url']

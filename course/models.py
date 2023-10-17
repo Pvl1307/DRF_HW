@@ -65,8 +65,10 @@ class Payments(models.Model):
     paid_course = models.ForeignKey(Course, on_delete=models.CASCADE, **NULLABLE, related_name='course')
     paid_lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, **NULLABLE, related_name='lesson')
 
-    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Amount')
+    amount = models.IntegerField(verbose_name='Amount')
     way_of_payment = models.CharField(max_length=10, choices=PAYMENT_CHOICES, verbose_name='Way of Payment')
+
+    is_paid = models.BooleanField(default=False, verbose_name='Status of payment')
 
     def __str__(self):
         return f'{self.user} paid for {self.paid_course if self.paid_course else self.paid_lesson}: {self.payment_date}'

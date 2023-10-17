@@ -1,12 +1,18 @@
+import os
+
+import stripe
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ModelViewSet, generics
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 
+from config.settings import STRIPE_API_KEY
 from course.models import Course, Lesson, Payments, Subscription
 from course.paginators import CoursePaginator, LessonPaginator
 from course.permissions import IsOwner, IsModer
-from course.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
+from course.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer, \
+    PaymentRetrieveSerializer, PaymentSuccessSerializer
 
 
 class CourseViewSet(ModelViewSet):
@@ -86,3 +92,34 @@ class PaymentsListAPIView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ('paid_course', 'paid_lesson', 'way_of_payment')
     ordering_fields = ('payment_date',)
+
+
+class PaymentCreateAPIView(generics.CreateAPIView):
+    serializer_class = PaymentsSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class PaymentRetrieveAPIView(generics.RetrieveAPIView):
+    serializer_class = PaymentRetrieveSerializer
+    queryset = Payments.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
+class PaymentSuccessAPIView(generics.RetrieveAPIView):
+    stripe.api_key = STRIPE_API_KEY
+    serializer_class = PaymentSuccessSerializer
+    queryset = Payments.objects.all()
+
+    def get_object(self):
+
+        session_id = self.request.query_params.get('session_id')
+        session = stripe.checkout.Session.retrieve(session_id)
+
+        payment_id = session.metadata['payment_id']
+        obj = get_object_or_404(self.get_queryset(), pk=payment_id)
+
+        if not obj.is_paid:
+            if session.payment_status == 'paid':
+                obj.is_paid = True
+                obj.save()
+        return obj
