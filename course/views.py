@@ -13,6 +13,7 @@ from course.paginators import CoursePaginator, LessonPaginator
 from course.permissions import IsOwner, IsModer
 from course.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer, \
     PaymentRetrieveSerializer, PaymentSuccessSerializer
+from course.tasks import send_mail_about_updates
 
 
 class CourseViewSet(ModelViewSet):
@@ -59,6 +60,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         new_lesson = serializer.save()
         new_lesson.owner = self.request.user
+        send_mail_about_updates.delay(new_lesson.course.id)
         new_lesson.save()
 
 
