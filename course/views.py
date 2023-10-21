@@ -21,6 +21,12 @@ class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     pagination_class = CoursePaginator
 
+    def perform_update(self, serializer):
+        updated_course = serializer.save()
+        updated_course.owner = self.request.user
+        send_mail_about_updates.delay(updated_course.id)
+        updated_course.save()
+
     def perform_create(self, serializer):
         new_course = serializer.save()
         new_course.owner = self.request.user
