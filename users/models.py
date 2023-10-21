@@ -5,4 +5,6 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class User(AbstractUser):
-    pass
+    def save(self, *args, **kwargs):
+        self.set_password(self.password)
+        super().save(*args, **kwargs)

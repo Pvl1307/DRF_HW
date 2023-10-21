@@ -1,4 +1,5 @@
 import logging
+import smtplib
 
 from celery import shared_task
 from django.core.mail import send_mail
@@ -23,5 +24,6 @@ def send_mail_about_updates(course_id):
             )
 
             logger.info(f'Mail sent to {sub.user.email}')
-        except Exception as e:
-            logger.error(f'Failed to send email: {str(e)}')
+        except smtplib.SMTPError as e:
+            # Обработка исключения SMTPError
+            print(f'Failed to send email: {str(e)}')

@@ -168,7 +168,7 @@ CACHE_ENABLED = os.getenv('CACHE_ENABLED') == 'True'
 
 CELERY_BEAT_SCHEDULE = {
     'task-name': {
-        'task': 'myapp.tasks.my_task',  # Путь к задаче
+        'task': 'users.tasks.user_activity',  # Путь к задаче
         'schedule': timedelta(minutes=1),  # Расписание выполнения задачи (например, каждые 10 минут)
     },
 }
