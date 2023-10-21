@@ -88,6 +88,12 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     permission_classes = [IsOwner | IsModer]
 
+    def perform_update(self, serializer):
+        updated_lesson = serializer.save()
+        updated_lesson.owner = self.request.user
+        send_mail_about_updates.delay(updated_lesson.course.id)
+        updated_lesson.save()
+
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
